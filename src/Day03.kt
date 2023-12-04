@@ -71,7 +71,10 @@ fun main() {
                     if (charIndex == line.length - 1) {
                         if (input[max(0, index - 1)].subSequence(max(0, charIndex - (foundNumber.length))..charIndex)
                                 .filterIndexed { indexFilter, c ->
-                                    asteriskIndex = max(0, charIndex - (foundNumber.length)) + indexFilter to index - 1
+                                    if (c.isAsterisk()) {
+                                        asteriskIndex =
+                                            max(0, charIndex - (foundNumber.length)) + indexFilter to index - 1
+                                    }
                                     c.isAsterisk()
                                 }.isNotEmpty() ||
                             input[min(
@@ -79,7 +82,10 @@ fun main() {
                                 index + 1
                             )].subSequence(max(0, charIndex - (foundNumber.length))..charIndex)
                                 .filterIndexed { indexFilter, c ->
-                                    asteriskIndex = max(0, charIndex - (foundNumber.length)) + indexFilter to index + 1
+                                    if (c.isAsterisk()) {
+                                        asteriskIndex =
+                                            max(0, charIndex - (foundNumber.length)) + indexFilter to index + 1
+                                    }
                                     c.isAsterisk()
                                 }.isNotEmpty() ||
                             line[max(0, charIndex - foundNumber.length)].isAsterisk().also {
@@ -98,7 +104,11 @@ fun main() {
                     }
                 } else {
                     if (foundNumber.isNotBlank()) {
-                        if (character.isSymbol() ||
+                        if (character.isAsterisk().also {
+                                if (it) {
+                                    asteriskIndex = charIndex to index
+                                }
+                            } ||
                             input[max(0, index - 1)].subSequence(
                                 max(
                                     0,
@@ -106,22 +116,30 @@ fun main() {
                                 )..charIndex
                             )
                                 .filterIndexed { indexFilter, c ->
-                                    asteriskIndex = max(
-                                        0,
-                                        charIndex - (foundNumber.length + 1)
-                                    ) + indexFilter to index - 1
+                                    if (c.isAsterisk()) {
+                                        asteriskIndex = max(
+                                            0,
+                                            charIndex - (foundNumber.length + 1)
+                                        ) + indexFilter to index - 1
+                                    }
                                     c.isAsterisk()
                                 }.isNotEmpty() ||
                             input[min(
                                 input.size - 1,
                                 index + 1
                             )].subSequence(max(0, charIndex - (foundNumber.length + 1))..charIndex)
-                                .filter {
-                                    it.isAsterisk()
+                                .filterIndexed { indexFilter, c ->
+                                    if (c.isAsterisk()) {
+                                        asteriskIndex = max(
+                                            0,
+                                            charIndex - (foundNumber.length + 1)
+                                        ) + indexFilter to index + 1
+                                    }
+                                    c.isAsterisk()
                                 }.isNotEmpty() ||
                             line[max(0, charIndex - (foundNumber.length + 1))].isAsterisk().also {
                                 if (it) {
-                                    asteriskIndex = max(0, charIndex - foundNumber.length + 1) to index
+                                    asteriskIndex = max(0, charIndex - (foundNumber.length + 1)) to index
                                 }
                             }
                         ) {
@@ -138,8 +156,9 @@ fun main() {
         }
         gearRatios.println()
         return gearRatios.filterNot { it.asteriskCoordinates == -1 to -1 }
-            .groupBy { it.asteriskCoordinates }.entries.sumOf {
-                it.value.map { it.number }.reduce { acc, number -> acc * number }
+            .groupBy { it.asteriskCoordinates }.filter { it.value.size != 1 }.entries.sumOf { entry ->
+                val numbers = entry.value.map { it.number }
+                numbers[0] * numbers[1]
             }
     }
 
