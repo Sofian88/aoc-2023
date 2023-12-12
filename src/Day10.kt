@@ -71,7 +71,7 @@ private fun getNeighbours(
     x to y + 1 to board.getOrNull(y + 1)?.getOrNull(x),
     x - 1 to y to board[y].getOrNull(x - 1),
     x + 1 to y to board[y].getOrNull(x + 1)
-).filterNot { it.second == null }.toTypedArray()
+)
 
 tailrec fun findLoop(
     board: List<List<Tile>>,
@@ -79,7 +79,7 @@ tailrec fun findLoop(
     actualItem: Pair<Int, Int>,
     distance: Long
 ): Long {
-    val current = board[actualItem.first][actualItem.second]
+    val current = board[actualItem.second][actualItem.first]
     val newVisited = visited.toMutableSet().also { it.add(actualItem) }
     "Visited ${actualItem}".println()
     val nextNeighbours = getNeighbours(actualItem.first, actualItem.second, board).validate(current)
